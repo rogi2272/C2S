@@ -61,11 +61,11 @@ parser = PydanticOutputParser(pydantic_object=FiltrosVeiculo)
 template = """
 Você é um assistente que transforma buscas em linguagem natural em filtros estruturados para busca de carros.
 
-Extraia os seguintes campos:
+Extraia os seguintes campos no formato JSON:
 - marca (string)
 - modelo (string)
-- ano (inteiro, mínimo)
-- motorizacao (float)
+- ano (inteiro, apenas o valor mínimo, sem intervalo)
+- motorizacao (string)
 - combustivel (string: gasolina, etanol, flex, diesel, etc)
 - cor (string)
 - quilometragem (inteiro)
@@ -75,18 +75,26 @@ Extraia os seguintes campos:
 
 {format_instructions}
 
+REGRAS IMPORTANTES:
+- Responda **somente com o JSON válido**, sem prefixos como "Resposta:" ou explicações.
+- Se o usuário disser "flex", extraia apenas os registros com o combustivel igual à "flex".
+- Se o usuário mencionar um intervalo de anos (ex: "entre 2020 e 2023"), extraia **apenas o menor ano** e preencha o campo `ano` com ele.
+- Se o usuário disser "a partir de 2020", preencha `ano` com 2020.
+- Se o usuário disser "até 2023", use 1900 como valor mínimo (ou deixe `ano` como null).
+- Nunca use dicionários ou objetos como valor do campo `ano`, apenas um número inteiro ou null.
+
 Exemplo:
-Frase do usuário: "quero um sedan automático da Honda até 70 mil reais, a partir de 2020"
+Frase do usuário: "quero um carro automático da Toyota entre 2018 e 2020, até 70 mil reais"
 Resposta:
 {{
-  "marca": "Honda",
+  "marca": "Toyota",
   "modelo": null,
-  "ano": 2020,
-  "motorizacao": 3.2,
+  "ano": 2018,
+  "motorizacao": null,
   "combustivel": null,
-  "cor": "Branco",
-  "quilometragem": 123612,
-  "portas": 4,
+  "cor": null,
+  "quilometragem": null,
+  "portas": null,
   "transmissao": "Automática",
   "preco_max": 70000.0
 }}
